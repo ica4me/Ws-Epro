@@ -26,3 +26,53 @@ Ws-Epro adalah backend WebSocket proxy ringan dan efisien, dibuat untuk menangan
   Ditulis dalam bahasa Go, cocok untuk VPS dengan sumber daya terbatas.
 
 ---
+## 🛠️ Instalasi
+
+### 1. Run Command 
+
+```
+wget -q https://raw.githubusercontent.com/ica4me/Ws-Epro/main/setup.sh && chmod +x setup.sh && ./setup.sh
+```
+
+Secara default, service akan berjalan di port `10015` dan meneruskan koneksi ke `127.0.0.1:143`. [Dropbear]
+
+---
+
+## ⚙️ Konfigurasi
+
+Edit file konfigurasi `config.conf` pada direktori /usr/bin/config.conf :
+
+```yaml
+## verbose level 0=info, 1=verbose, 2=very verbose
+verbose: 0
+listen:
+
+# // SSH
+- target_host: 127.0.0.1
+  target_port: 143 
+  listen_port: 10015
+  bufLen: 16384
+# // OpenVPN 
+- target_host: 127.0.0.1
+  target_port: 1194
+  listen_port: 10012
+  bufLen: 16384
+```
+
+> Ws harus berjalan pada root dan memiliki akses penuh, Jika Service membatasi akses ws ke root maka, service akan berhenti.
+
+---
+
+## Utilisasi
+periksa port service
+```
+sudo ss -tlnp | grep -E ':(80|443|10015|22)\b'
+```
+Log Koneksi ws/80
+```
+sudo journalctl -u ws -f
+```
+Log Koneksi stunnel4/443
+```
+sudo journalctl -u stunnel4 -f
+```
