@@ -1,0 +1,17 @@
+[Unit]
+Description=WebSocket TCP relay (clean)
+After=syslog.target network-online.target
+
+[Service]
+# Jalankan sebagai user non-root bila memungkinkan. Jika target_port < 1024
+# atau listen_port < 1024 diperlukan, gunakan AmbientCapabilities di bawah
+# daripada menjalankan sebagai root penuh.
+User=root
+NoNewPrivileges=true
+ExecStart=/usr/bin/ws -f /etc/ws/config.conf
+Restart=on-failure
+LimitNPROC=65535
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
