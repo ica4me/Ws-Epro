@@ -78,7 +78,7 @@ esac
 step "2/11  Pasang paket yang diperlukan"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y -q
-PKGS="curl ca-certificates wget openssh-server stunnel4 openssl"
+PKGS="curl ca-certificates wget openssh-server stunnel4 openssl netcat-openbsd"
 [ "$ENABLE_UFW" = "1" ] && PKGS="$PKGS ufw"
 [ "$WITH_UDPGW" = "1" ] && PKGS="$PKGS git cmake make gcc build-essential"
 apt-get install -y -q $PKGS
@@ -207,7 +207,7 @@ c_g "stunnel aktif di port ${TLS_PORT}."
 
 # ----------------------------------------------------------------------------
 step "8/11  (Opsional) badvpn-udpgw untuk UDP"
-if [ "$WITH_UDPGW" = "1" ]; then
+if [ "$WITH_UDPGW" = "0" ]; then
   if [ ! -x /usr/local/bin/badvpn-udpgw ]; then
     ( set -e
       git clone --depth 1 https://github.com/ambrop72/badvpn.git "$TMP/badvpn"
@@ -255,7 +255,7 @@ step "10/11  (Opsional) Akun demo"
 DEMO_USER=""; DEMO_PASS=""
 if [ "$MAKE_DEMO_USER" = "1" ]; then
   DEMO_USER="${DEMO_USER_NAME:-user01}"
-  DEMO_PASS="$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 14)"
+  DEMO_PASS="$(openssl rand -hex 9)"   # 18 char hex; tanpa pipe/head (hindari SIGPIPE+pipefail)
   if ! id "$DEMO_USER" >/dev/null 2>&1; then
     useradd -M -s /bin/false -e "$(date -d '+30 days' +%F)" "$DEMO_USER"
   fi
