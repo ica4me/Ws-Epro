@@ -30,7 +30,7 @@ Ws-Epro adalah backend WebSocket proxy ringan dan efisien, dibuat untuk menangan
 | Metode Instalasi | Dokumentasi |
 |:-----------------|:------------|
 | 📖 **1. Manual Install** | [Buka Panduan Instalasi Manual](https://github.com/ica4me/Ws-Epro/blob/main/panduan_instalasi_manual_ws_epro.md) |
-| 🚀 **2. Auto Install** | [Langsung ke Instalasi Otomatis](#-run-command) |
+| 🚀 **2. Auto Install** | [Langsung ke Instalasi 👇](#-run-command) |
 
 ### 1. Run Command 
 
