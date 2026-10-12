@@ -1,14 +1,12 @@
-# Panduan Instalasi Manual Ws-Epro (SSH over WebSocket)
+# Manual Instalasi Ws (SSH over WebSocket)
 
-Panduan ini berisi langkah-langkah lengkap dari nol untuk mengatur tunnel SSH-over-WebSocket di VPS Ubuntu/Debian. Klien akan dapat terhubung melalui port 80 dan 443.
+Berisi langkah-langkah lengkap untuk mengatur tunnel SSH-over-WebSocket di VPS Ubuntu/Debian.
 
 **Catatan:** Jalankan semua perintah di bawah ini sebagai `root`.
 
 ## 1. Pasang Binary ws dan Folder Config
 
 Buat direktori, unduh binary bersih, dan berikan hak akses eksekusi.
-*(Catatan: Lebih aman jika mengkompilasi sendiri dari `main.go` dengan `go build -o ws .`)*
-
 ```bash
 sudo mkdir -p /etc/ws
 cd /etc/ws
@@ -18,7 +16,7 @@ sudo chmod +x /usr/bin/ws
 
 ## 2. Siapkan Server SSH sebagai Target Tunnel
 
-Gunakan OpenSSH bawaan (port 22) untuk kemudahan. Aktifkan login password.
+Gunakan OpenSSH bawaan (port 22). Aktifkan login password.
 Alur tunnel: Klien → ws (80/443) → 127.0.0.1:22 (sshd).
 
 ```bash
@@ -27,7 +25,7 @@ sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ss
 sudo systemctl restart ssh
 ```
 
-## 3. Tulis Konfigurasi (config.conf)
+## 3. Konfigurasi (config.conf)
 
 Buat file konfigurasi untuk mengatur routing port. Port 80 dilayani langsung oleh `ws`, sedangkan port 443 akan ditangani oleh stunnel.
 
@@ -51,10 +49,9 @@ listen:
 EOF
 ```
 
-## 4. Buat Service Systemd dan Jalankan
+## 4. Service Systemd
 
-Buat service agar `ws` berjalan di latar belakang (daemon). Menjalankannya sebagai root diperlukan karena mengikat port di bawah 1024 (port 80).
-
+Buat service agar `ws` berjalan di latar belakang (daemon).
 ```bash
 sudo tee /etc/systemd/system/ws.service >/dev/null <<'EOF'
 [Unit]
@@ -78,22 +75,17 @@ sudo systemctl status ws --no-pager
 ```
 
 ## 5. Buka Firewall
-
-Pastikan port yang dibutuhkan tidak diblokir oleh firewall.
-
 ```bash
 sudo ufw allow 22,80,443/tcp 2>/dev/null || true
 ```
 
 ## 6. Buat Akun dan Password untuk Klien
 
-Buat akun VPN/SSH untuk klien. Contoh ini membuat akun aktif selama 30 hari tanpa akses shell (hanya untuk tunnel).
-
+Contoh ini membuat akun aktif selama 30 hari tanpa akses shell (hanya untuk tunnel).
 ```bash
 sudo useradd -M -s /bin/false -e $(date -d "+30 days" +%F) user01
 echo 'user01:pass01' | sudo chpasswd
 ```
-*(Ganti `user01` dan `pass01` sesuai kebutuhan. Jika klien butuh shell, ganti `/bin/false` menjadi `/bin/bash`)*.
 
 ## 7. Setup Port 443 (TLS/wss) via Stunnel
 
@@ -143,16 +135,15 @@ sudo journalctl -u stunnel4 -f
 
 ---
 
-## Testing Koneksi dari Klien (HTTP Custom)
+## Testing Koneksi dari Klien (APK HTTP Custom)
 
-Gunakan pola berikut pada aplikasi HTTP Custom (atau aplikasi serupa yang mendukung payload bergaya HTTP Injector tanpa `Sec-WebSocket-Key`):
+Gunakan pola berikut pada aplikasi HTTP Custom (atau aplikasi serupa yang mendukung payload HTTP tanpa `Sec-WebSocket-Key`):
 
 *   **Host/Server SSH:** `IP_VPS`
-*   **Port SSH:** `80` *(Penting: Jangan gunakan 22 untuk mode ws direct)*
+*   **Port SSH:** `80`
 *   **Username:** `user01`
 *   **Password:** `pass01`
 *   **Payload:**
-
 ```text
 GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf]Connection: Upgrade[crlf][crlf]
 ```
